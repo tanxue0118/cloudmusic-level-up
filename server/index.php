@@ -115,6 +115,7 @@ class API{
     // logout: clear stored login state
     public function logout(){
         $this->clearState();
+        @unlink($this->_stateFile.'.me.json');
         setcookie("MUSIC_U","",time()-3600);
         setcookie("__csrf","",time()-3600);
         return '{"code":200,"msg":"logged out"}';
@@ -123,6 +124,38 @@ class API{
     public function status(){
         $logged=($this->cred("MUSIC_U")!=='');
         return '{"code":200,"logged_in":'.($logged?'true':'false').'}';
+    }
+    // logged-in user's own profile (verified against upstream, with short cache)
+    public function me(){
+        $cache=$this->_stateFile.'.me.json';
+        if(is_file($cache)){
+            $c=@json_decode(@file_get_contents($cache),true);
+            if(is_array($c) && time()-($c['t']??0)<120){
+                return $c['body'];
+            }
+        }
+        $raw=$this->curl("https://music.163.com/api/nuser/account/get");
+        $json=json_decode($raw,1);
+        if(is_array($json) && ($json["code"]??null)==200 && !empty($json["profile"])){
+            $p=$json["profile"];
+            $body=json_encode(array(
+                "code"=>200,
+                "logged_in"=>true,
+                "level"=>$json["level"]??null,
+                "listenSongs"=>$json["listenSongs"]??null,
+                "profile"=>array(
+                    "nickname"=>$p["nickname"]??"",
+                    "userId"=>$p["userId"]??"",
+                    "avatarUrl"=>$p["avatarUrl"]??"",
+                    "vipType"=>$p["vipType"]??0,
+                    "follows"=>$p["follows"]??0,
+                    "followeds"=>$p["followeds"]??0
+                )
+            ),JSON_UNESCAPED_UNICODE);
+            @file_put_contents($cache,json_encode(array('t'=>time(),'body'=>$body)));
+            return $body;
+        }
+        return '{"code":200,"logged_in":false}';
     }
     // get user detail
     public function detail($uid){
@@ -304,6 +337,7 @@ echo $api->login($_REQUEST["uin"],$_REQUEST["pwd"],$_REQUEST["countrycode"]);}
 elseif($_REQUEST["do"]=="email"){echo $api->loginByEmail($_REQUEST["uin"],$_REQUEST["pwd"]);}
 elseif($_REQUEST["do"]=="logout"){echo $api->logout();}
 elseif($_REQUEST["do"]=="status"){echo $api->status();}
+elseif($_REQUEST["do"]=="me"){echo $api->me();}
 elseif($_REQUEST["do"]=="sign"){echo $api->sign();}
 elseif($_REQUEST["do"]=="daka"){echo $api->daka_new();}
 elseif($_REQUEST["do"]=="check"){echo $api->follow();}

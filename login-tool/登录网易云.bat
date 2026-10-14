@@ -1,39 +1,30 @@
 @echo off
-chcp 65001 >nul
-title ç½‘æ˜“äº‘ç™»å½•å·¥å…·
+title ÍøÒ×ÔÆµÇÂ¼¹¤¾ß
 cd /d "%~dp0"
 
 echo ============================================
-echo  ç½‘æ˜“äº‘ç™»å½•å·¥å…·
-echo  ç™»å½•åè‡ªåŠ¨åŒæ­¥åˆ°ä½ çš„æœåŠ¡å™¨
+echo  ÍøÒ×ÔÆµÇÂ¼¹¤¾ß
+echo  µÇÂ¼ºó×Ô¶¯Í¬²½µ½·şÎñÆ÷
 echo ============================================
 echo.
 
 where py >nul 2>nul
 if errorlevel 1 (
-    echo [é”™è¯¯] æœªæ‰¾åˆ° Pythonï¼Œè¯·å…ˆå®‰è£… Python 3.8 æˆ–æ›´é«˜ç‰ˆæœ¬ã€‚
-    pause
-    exit /b 1
-)
-
-if not exist config.json (
-    echo [é”™è¯¯] æœªæ‰¾åˆ° config.json
-    echo è¯·å¤åˆ¶ config.example.json ä¸º config.jsonï¼Œå¹¶å¡«å…¥ä½ çš„æœåŠ¡å™¨ä¿¡æ¯ã€‚
+    echo [´íÎó] Î´ÕÒµ½ Python£¬ÇëÏÈ°²×° Python 3¡£
     pause
     exit /b 1
 )
 
 py -c "import playwright, paramiko, requests" >nul 2>nul
 if errorlevel 1 (
-    echo æ­£åœ¨å®‰è£…ä¾èµ–ï¼Œè¯·ç¨å€™â€¦
+    echo ÕıÔÚ°²×°ÒÀÀµ£¬ÇëÉÔºò...
     py -m pip install playwright paramiko requests
     if errorlevel 1 (
-        echo [é”™è¯¯] ä¾èµ–å®‰è£…å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œã€‚
+        echo [´íÎó] ÒÀÀµ°²×°Ê§°Ü£¬Çë¼ì²éÍøÂç¡£
         pause
         exit /b 1
     )
-    echo æ­£åœ¨å‡†å¤‡æµè§ˆå™¨å†…æ ¸â€¦
-    py -m playwright install msedge
+    py -m playwright install
 )
 
 py browser_login.py

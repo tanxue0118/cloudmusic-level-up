@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>网易云自动刷歌</title>
-<meta name="description" content="网易云音乐自动刷歌控制台">
+<title>网易云刷歌</title>
+<meta name="description" content="网易云音乐刷歌控制台">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -198,7 +198,7 @@
     <div class="brand">
       <div class="mark">云</div>
       <div>
-        <div class="brand-t">网易云自动刷歌</div>
+        <div class="brand-t">网易云刷歌</div>
         <div class="brand-s">Auto Play</div>
       </div>
     </div>
@@ -283,11 +283,10 @@
         <h3>怎么登录</h3>
         <div class="sub">登录在你自己的电脑上完成，不经过服务器，避免网易云风控</div>
         <ol class="steps">
-          <li>在服务器上跑好后端（见仓库 <code>server/</code> 说明）</li>
-          <li>在本机准备 <code>login-tool/</code>，按里面的 <code>config.example.json</code> 填好自己的服务器信息</li>
-          <li>双击运行 <code>登录网易云.bat</code>（或 <code>py browser_login.py</code>）</li>
-          <li>在弹出的窗口里登录网易云（扫码 / 账号密码 / 短信均可），成功后自动同步</li>
-          <li>回到本页点「刷新状态」即可</li>
+          <li>打开电脑上的文件夹 <code>D:\服务器</code></li>
+          <li>双击运行 <code>登录网易云.bat</code></li>
+          <li>在弹出的窗口里登录网易云（扫码 / 账号密码 / 短信均可）</li>
+          <li>登录成功后工具会自动同步，回到本页点「刷新状态」即可</li>
         </ol>
         <div class="note">
           <div>登录态（cookie）长期有效，通常可用数周到数月。失效后重新运行一次工具即可。</div>
@@ -368,12 +367,12 @@
         <div class="sub">保存在本机浏览器，不会上传到任何地方</div>
         <div class="field">
           <label>接口地址</label>
-          <input class="inp" id="c-base" placeholder="http://your-server:8080">
+          <input class="inp" id="c-base" placeholder="http://47.119.141.181:8080">
           <div class="hint">留空则使用当前页面同源地址</div>
         </div>
         <div class="field">
           <label>默认 UID</label>
-          <input class="inp" id="c-uid" placeholder="你的网易云 UID">
+          <input class="inp" id="c-uid" placeholder="2084649723">
           <div class="hint">总览页查询的账号 UID</div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
@@ -384,7 +383,7 @@
       </div>
     </section>
 
-    <footer class="foot">网易云自动刷歌 · 开源项目 · 仅供学习使用</footer>
+    <footer class="foot">网易云刷歌 · 本地控制台 · 仅供自己使用</footer>
   </main>
 </div>
 
@@ -400,7 +399,7 @@
     var o={};
     if(raw){ try{ o=JSON.parse(raw)||{}; }catch(e){ o={}; } }
     if(!o.base) o.base = location.protocol.indexOf("http")===0 ? location.origin : "";
-    if(!o.uid) o.uid = "";
+    if(!o.uid) o.uid = "2084649723";
     // 支持从地址栏 #base=xxx&uid=xxx 一次性导入（导入后自动清理）
     try{
       var h=location.hash.replace(/^#/,"");
@@ -482,10 +481,10 @@
   function loadProfile(){
     var btn=$("#btn-refresh");
     busy(btn,true);
-    api({do:"detail",uid:cfg.uid}).then(function(r){
+    api({do:"me"}).then(function(r){
       var d=r.data||{};
-      var p=d.profile||{};
-      if(p.nickname){
+      if(d.logged_in){
+        var p=d.profile||{};
         $("#p-name").textContent=p.nickname;
         $("#p-id").textContent="UID "+p.userId;
         $("#av").src=p.avatarUrl||"";
@@ -496,8 +495,14 @@
         $("#p-tag").textContent = vip? "VIP" : "已登录";
         show($("#out-home"),"账号数据加载成功");
       }else{
-        $("#p-tag").textContent="未登录或失败";
-        show($("#out-home"),d,"接口返回：");
+        $("#p-name").textContent="未登录";
+        $("#p-id").textContent="UID —";
+        $("#av").src="";
+        $("#s-lv").textContent="—";
+        $("#s-listen").textContent="—";
+        $("#s-fol").textContent="—";
+        $("#p-tag").textContent="未登录";
+        show($("#out-home"),"当前未登录，请在本机运行「登录网易云.bat」完成登录");
       }
     }).catch(function(e){
       show($("#out-home"),"请求失败："+e.message);
@@ -508,7 +513,7 @@
 
   /* ---------- login ---------- */
   function refreshLoginState(silent){
-    api({do:"status"}).then(function(r){
+    api({do:"me"}).then(function(r){
       var logged=!!(r.data&&r.data.logged_in);
       if(logged){
         $("#login-sub").textContent="已登录，服务可用";
@@ -525,7 +530,7 @@
   }
   $("#btn-login-refresh").addEventListener("click",function(){
     var btn=this; busy(btn,true);
-    api({do:"status"}).then(function(r){
+    api({do:"me"}).then(function(r){
       var logged=!!(r.data&&r.data.logged_in);
       $("#login-sub").textContent=logged?"已登录，服务可用":"未登录，请在本机运行「登录网易云.bat」";
       if(logged){ show($("#out-login"),"当前状态：已登录"); loadProfile(); }
@@ -597,7 +602,7 @@
     cfg.uid=$("#c-uid").value.trim();
     saveCfg();
     show($("#out-conf"),"已保存，正在测试连接……");
-    api({do:"status"}).then(function(r){
+    api({do:"me"}).then(function(r){
       if(r.ok&&r.data){
         show($("#out-conf"),"连接成功，登录状态："+(r.data.logged_in?"已登录":"未登录"));
       }else{

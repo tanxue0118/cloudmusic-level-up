@@ -105,6 +105,10 @@ netease-autoplay/
 后端基于 [ZainCheung/netease-cloud-api](https://github.com/ZainCheung/netease-cloud-api) 修改，
 遵循其 MIT 许可。灵感来自 [Binaryify/NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)。
 
+## 声明
+
+本项目的所有脚本以及软件仅用于个人学习开发测试，所有网易云相关字样版权属于网易公司，勿用于商业及非法用途，如产生法律纠纷与本人无关。
+
 ## 许可
 
 本项目遵循 MIT 许可。上游相关版权归原作者所有。

@@ -138,18 +138,33 @@ class API{
         $json=json_decode($raw,1);
         if(is_array($json) && ($json["code"]??null)==200 && !empty($json["profile"])){
             $p=$json["profile"];
+            $uid=(string)($p["userId"]??"");
+            $lv=null;$ls=null;$fw=null;$fd=null;
+            if($uid!==''){
+                // account/get 没有统计字段，用 user/detail 补齐
+                $dj=json_decode($this->detail($uid),1);
+                if(is_array($dj)){
+                    $lv=$dj["level"]??null;
+                    $ls=$dj["listenSongs"]??null;
+                    $dp=$dj["profile"]??null;
+                    if(is_array($dp)){
+                        $fw=$dp["follows"]??null;
+                        $fd=$dp["followeds"]??null;
+                    }
+                }
+            }
             $body=json_encode(array(
                 "code"=>200,
                 "logged_in"=>true,
-                "level"=>$json["level"]??null,
-                "listenSongs"=>$json["listenSongs"]??null,
+                "level"=>$lv,
+                "listenSongs"=>$ls,
                 "profile"=>array(
                     "nickname"=>$p["nickname"]??"",
-                    "userId"=>$p["userId"]??"",
+                    "userId"=>$uid,
                     "avatarUrl"=>$p["avatarUrl"]??"",
                     "vipType"=>$p["vipType"]??0,
-                    "follows"=>$p["follows"]??0,
-                    "followeds"=>$p["followeds"]??0
+                    "follows"=>$fw,
+                    "followeds"=>$fd
                 )
             ),JSON_UNESCAPED_UNICODE);
             @file_put_contents($cache,json_encode(array('t'=>time(),'body'=>$body)));

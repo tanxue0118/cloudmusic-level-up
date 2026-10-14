@@ -1,0 +1,21 @@
+# 依赖与运行产物
+__pycache__/
+*.pyc
+node_modules/
+
+# 登录工具：配置与登录态（含个人信息，切勿提交）
+login-tool/config.json
+login-tool/.login-profile/
+*.login-profile/
+
+# 服务器部署：登录态与本地笔记
+server/state/
+server/.env
+deploy_notes.md
+
+# 各种临时/敏感文件
+*.log
+music_u.txt
+csrf.txt
+*_cookie*.txt
+cookie*.json

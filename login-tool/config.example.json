@@ -1,0 +1,9 @@
+{
+  "server_host": "your-server-ip",
+  "api_port": 8080,
+  "ssh_port": 22,
+  "ssh_user": "root",
+  "ssh_password": "your-ssh-password",
+  "ssh_key_path": "",
+  "remote_dir": "/opt/netease-autoplay"
+}

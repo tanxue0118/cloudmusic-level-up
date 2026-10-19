@@ -167,6 +167,36 @@
   .steps code{font-family:var(--mono);font-size:12px;background:var(--surface-2);
     border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink)}
 
+  /* level progress */
+  .lvl-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+  .lvl-now{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.6px;line-height:1}
+  .lvl-unit{font-size:13px;font-weight:500;color:var(--ink-3);margin-left:4px}
+  .lvl-next{font-size:12.5px;color:var(--ink-3)}
+  .lvl-next b{color:var(--ink);font-family:var(--display)}
+  .bar{height:8px;border-radius:999px;background:var(--line-2);overflow:hidden}
+  .bar-fill{height:100%;width:0;border-radius:999px;background:var(--accent);
+    transition:width .6s cubic-bezier(.34,1.2,.64,1)}
+  .lvl-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin-top:10px;font-size:12.5px;color:var(--ink-3)}
+  .lvl-meta b{color:var(--ink);font-family:var(--display)}
+
+  /* rank list */
+  .rank-list{display:flex;flex-direction:column;gap:2px}
+  .rank-item{display:flex;align-items:center;gap:12px;padding:9px 4px;
+    border-bottom:1px solid var(--line-2)}
+  .rank-item:last-child{border-bottom:none}
+  .rank-no{width:22px;flex-shrink:0;font-family:var(--display);font-size:12px;
+    color:var(--ink-3);text-align:center}
+  .rank-item:nth-child(-n+3) .rank-no{color:var(--accent);font-weight:700}
+  .rank-cover{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0;
+    background:var(--line-2);border:1px solid var(--line)}
+  .rank-main{flex:1;min-width:0}
+  .rank-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rank-sub{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rank-count{font-family:var(--mono);font-size:12px;color:var(--ink-2);flex-shrink:0}
+  .rank-empty{padding:20px 0;text-align:center;color:var(--ink-3);font-size:12.5px}
+  .seg.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
   footer.foot{margin-top:30px;font-size:11.5px;color:var(--ink-3);text-align:center}
 
   /* ---------- Mobile ---------- */
@@ -219,9 +249,9 @@
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h13"/><path d="M3 12h13"/><path d="M3 18h9"/><path d="M20 8v8"/><path d="M17 12h6"/></svg>
         刷指定歌单
       </button>
-      <button class="nav-btn" data-p="sign">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-        每日签到
+      <button class="nav-btn" data-p="report">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-6"/><path d="M22 20V8"/></svg>
+        听歌报告
       </button>
       <button class="nav-btn" data-p="conf">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -262,6 +292,23 @@
           <button class="btn" id="btn-logout-top" style="color:var(--accent);border-color:var(--accent-soft)"><span class="sp"></span>退出登录</button>
         </div>
         <pre class="out" id="out-home"></pre>
+      </div>
+
+      <div class="card" id="level-card">
+        <h3>等级进度</h3>
+        <div class="sub" id="level-sub">加载中…</div>
+        <div class="lvl-row">
+          <div class="lvl-now"><span id="lvl-num">—</span><span class="lvl-unit">级</span></div>
+          <div class="lvl-next">下一级 <b id="lvl-next">—</b></div>
+        </div>
+        <div class="bar"><div class="bar-fill" id="lvl-bar"></div></div>
+        <div class="lvl-meta">
+          <span>本等级已听 <b id="lvl-now-play">—</b> / <span id="lvl-next-play">—</span> 首</span>
+          <span>还差 <b id="lvl-remain">—</b> 首</span>
+        </div>
+        <div class="lvl-meta" style="margin-top:6px">
+          <span>登录天数 <b id="lvl-login-now">—</b> / <span id="lvl-login-next">—</span></span>
+        </div>
       </div>
     </section>
 
@@ -340,19 +387,33 @@
       </div>
     </section>
 
-    <!-- 签到 -->
-    <section class="panel" id="p-sign">
+    <!-- 听歌报告 -->
+    <section class="panel" id="p-report">
       <div class="head">
-        <h1>每日签到</h1>
-        <p>调用签到接口</p>
+        <h1>听歌报告</h1>
+        <p>基于你的听歌记录统计</p>
       </div>
       <div class="card">
-        <div class="big">
-          <div class="em">签到</div>
-          <div class="cap">可能因上游接口停用而不可用</div>
-          <button class="btn pri" id="btn-sign" style="min-width:170px"><span class="sp"></span>立即签到</button>
+        <div style="display:flex;gap:8px;margin-bottom:18px">
+          <button class="btn seg on" id="btn-week">本周</button>
+          <button class="btn seg" id="btn-all">全部时间</button>
         </div>
-        <pre class="out" id="out-sign"></pre>
+        <div class="stats" style="margin-top:0">
+          <div class="stat"><div class="stat-l">总播放次数</div><div class="stat-v" id="r-plays">—</div></div>
+          <div class="stat"><div class="stat-l">涉及歌曲</div><div class="stat-v" id="r-songs">—</div></div>
+          <div class="stat"><div class="stat-l">涉及歌手</div><div class="stat-v" id="r-artists">—</div></div>
+        </div>
+        <pre class="out" id="out-report"></pre>
+      </div>
+      <div class="card">
+        <h3>最常听的歌曲</h3>
+        <div class="sub" id="song-sub">Top 10</div>
+        <div id="song-list" class="rank-list"></div>
+      </div>
+      <div class="card">
+        <h3>最常听的歌手</h3>
+        <div class="sub">按播放次数</div>
+        <div id="artist-list" class="rank-list"></div>
       </div>
     </section>
 
@@ -459,6 +520,7 @@
     [].slice.call(document.querySelectorAll(".panel")).forEach(function(s){
       s.classList.toggle("on", s.id==="p-"+p);
     });
+    if(p==="report"){ loadReport(); }
   }
   navList.forEach(function(b){ b.addEventListener("click",function(){ go(b.dataset.p); }); });
 
@@ -508,6 +570,7 @@
       show($("#out-home"),"请求失败："+e.message);
       $("#p-tag").textContent="请求失败";
     }).finally(function(){ busy(btn,false); });
+    loadLevel();
   }
   $("#btn-refresh").addEventListener("click",loadProfile);
 
@@ -581,15 +644,82 @@
     }).finally(function(){ busy(btn,false); });
   });
 
-  /* ---------- sign ---------- */
-  $("#btn-sign").addEventListener("click",function(){
-    var btn=this; busy(btn,true);
-    api({do:"sign"}).then(function(r){
-      show($("#out-sign"),r.data,"返回：");
+  /* ---------- level ---------- */
+  function loadLevel(){
+    api({do:"level"}).then(function(r){
+      var d=r.data||{};
+      if(!d.ok){
+        $("#level-sub").textContent="未登录或获取失败";
+        return;
+      }
+      $("#lvl-num").textContent=d.level;
+      $("#lvl-next").textContent=(d.level+1)+" 级";
+      var pct=Math.max(0,Math.min(100,Math.round((d.progress||0)*1000)/10));
+      $("#lvl-bar").style.width=pct+"%";
+      $("#level-sub").textContent="当前进度 "+pct+"%";
+      $("#lvl-now-play").textContent=d.nowPlayCount;
+      $("#lvl-next-play").textContent=d.nextPlayCount+" 首";
+      $("#lvl-remain").textContent=d.remainPlayCount;
+      $("#lvl-login-now").textContent=d.nowLoginCount;
+      $("#lvl-login-next").textContent=d.nextLoginCount;
+    }).catch(function(){
+      $("#level-sub").textContent="获取失败";
+    });
+  }
+
+  /* ---------- report ---------- */
+  var reportType=1;
+  function renderRanks(songs,artists){
+    var sl=$("#song-list"),al=$("#artist-list");
+    if(!songs||!songs.length){ sl.innerHTML='<div class="rank-empty">暂无数据</div>'; }
+    else{
+      sl.innerHTML=songs.map(function(s,i){
+        var cov=s.cover?'<img class="rank-cover" src="'+s.cover+'" alt="" loading="lazy">'
+                       :'<div class="rank-cover"></div>';
+        return '<div class="rank-item"><div class="rank-no">'+(i+1)+'</div>'+cov+
+          '<div class="rank-main"><div class="rank-name">'+escapeHtml(s.name)+
+          '</div><div class="rank-sub">'+escapeHtml(s.artist||"")+'</div></div>'+
+          '<div class="rank-count">'+s.playCount+' 次</div></div>';
+      }).join("");
+    }
+    if(!artists||!artists.length){ al.innerHTML='<div class="rank-empty">暂无数据</div>'; }
+    else{
+      al.innerHTML=artists.map(function(a,i){
+        return '<div class="rank-item"><div class="rank-no">'+(i+1)+'</div>'+
+          '<div class="rank-main"><div class="rank-name">'+escapeHtml(a.name)+'</div></div>'+
+          '<div class="rank-count">'+a.playCount+' 次</div></div>';
+      }).join("");
+    }
+  }
+  function escapeHtml(s){
+    return String(s||"").replace(/[&<>"]/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+  function loadReport(){
+    $("#btn-week").classList.toggle("on",reportType===1);
+    $("#btn-all").classList.toggle("on",reportType===0);
+    $("#song-sub").textContent = reportType===1 ? "本周 Top 10" : "全部时间 Top 10";
+    show($("#out-report"),"加载中…");
+    api({do:"report",type:reportType}).then(function(r){
+      var d=r.data||{};
+      if(!d.ok){
+        $("#r-plays").textContent="—";$("#r-songs").textContent="—";$("#r-artists").textContent="—";
+        renderRanks([],[]);
+        show($("#out-report"),d.msg||"加载失败");
+        return;
+      }
+      $("#r-plays").textContent=d.totalPlays;
+      $("#r-songs").textContent=d.songCount;
+      $("#r-artists").textContent=d.artistCount;
+      renderRanks(d.topSongs,d.topArtists);
+      show($("#out-report"),"统计完成");
     }).catch(function(e){
-      show($("#out-sign"),"请求失败："+e.message);
-    }).finally(function(){ busy(btn,false); });
-  });
+      show($("#out-report"),"请求失败："+e.message);
+    });
+  }
+  $("#btn-week").addEventListener("click",function(){ reportType=1; loadReport(); });
+  $("#btn-all").addEventListener("click",function(){ reportType=0; loadReport(); });
 
   /* ---------- config ---------- */
   function fillCfg(){

@@ -53,11 +53,13 @@ API_PORT=9000
 | 路径 | 说明 |
 |------|------|
 | `/?do=status` | 查询是否已登录，返回 `{"code":200,"logged_in":true/false}` |
+| `/?do=me` | 当前登录账号资料（昵称/头像/等级/听歌数/关注粉丝） |
+| `/?do=level` | 等级进度：`level`、`nowPlayCount`、`nextPlayCount`、`remainPlayCount`、`progress` |
+| `/?do=report&type=0\|1` | 听歌报告：0=全部，1=本周；返回总播放、歌曲数、歌手数、Top10 歌曲/歌手 |
 | `/?do=logout` | 退出登录（删除登录态文件） |
-| `/?do=detail&uid=UID` | 查询用户信息 |
+| `/?do=detail&uid=UID` | 查询指定用户信息 |
 | `/?do=daka` | 刷满 300 首 |
 | `/?do=listen&id=歌单ID&time=次数` | 刷指定歌单 |
-| `/?do=sign` | 每日签到（上游可能已停用） |
 
 ## 安全提示
 

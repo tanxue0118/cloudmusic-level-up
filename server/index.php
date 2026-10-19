@@ -280,10 +280,97 @@ class API{
         }
         return '{"code":200,"count":'.$this->scrobble($ids).'}';
     }
-    public function sign(){
-        $url="https://music.163.com/weapi/point/dailyTask";
-        $data=array("type"=>0);
-        return $this->curl($url,$this->prepare($data),true);
+    // user level progress
+    public function level(){
+        $raw=$this->curl("https://music.163.com/api/user/level");
+        $json=json_decode($raw,1);
+        $d=is_array($json)?($json["data"]??null):null;
+        if(!is_array($d)){
+            return '{"code":200,"ok":false,"msg":"获取等级信息失败"}';
+        }
+        $now=(int)($d["nowPlayCount"]??0);
+        $next=(int)($d["nextPlayCount"]??0);
+        $remain=$next>$now?($next-$now):0;
+        $progress=isset($d["progress"])?(float)$d["progress"]:($next>0?round($now/$next,4):0);
+        return json_encode(array(
+            "code"=>200,
+            "ok"=>true,
+            "level"=>(int)($d["level"]??0),
+            "nowPlayCount"=>$now,
+            "nextPlayCount"=>$next,
+            "remainPlayCount"=>$remain,
+            "progress"=>$progress,
+            "nowLoginCount"=>(int)($d["nowLoginCount"]??0),
+            "nextLoginCount"=>(int)($d["nextLoginCount"]??0)
+        ),JSON_UNESCAPED_UNICODE);
+    }
+    // listening report: type=0 all time, type=1 this week
+    public function report($type){
+        $type=($type==="1")?1:0;
+        $cache=$this->_stateFile.'.report'.$type.'.json';
+        if(is_file($cache)){
+            $c=@json_decode(@file_get_contents($cache),true);
+            if(is_array($c) && time()-($c['t']??0)<120){
+                return $c['body'];
+            }
+        }
+        // resolve current uid from account
+        $acc=json_decode($this->curl("https://music.163.com/api/nuser/account/get"),1);
+        $uid=(is_array($acc)&&!empty($acc["profile"]["userId"]))?(string)$acc["profile"]["userId"]:"";
+        if($uid===""){
+            return '{"code":200,"ok":false,"msg":"未登录"}';
+        }
+        $raw=$this->curl("https://music.163.com/api/v1/play/record?uid=".$uid."&type=".$type);
+        $json=json_decode($raw,1);
+        if(!is_array($json) || !isset($json["code"]) || $json["code"]!=200){
+            return '{"code":200,"ok":false,"msg":"获取听歌记录失败"}';
+        }
+        $list = $type===1 ? ($json["weekData"]??array()) : ($json["allData"]??array());
+        $totalPlays=0; $songs=0; $artistPlays=array();
+        $topSongs=array();
+        foreach($list as $row){
+            $pc=(int)($row["playCount"]??0);
+            $song=$row["song"]??array();
+            $totalPlays+=$pc; $songs++;
+            $name=$song["name"]??"未知歌曲";
+            $ar=$song["ar"]??array();
+            $artistNames=array();
+            foreach($ar as $a){
+                $an=$a["name"]??"";
+                if($an!==""){ $artistNames[]=$an; }
+            }
+            $artistStr=implode(" / ",$artistNames);
+            foreach($artistNames as $an){
+                $artistPlays[$an]=($artistPlays[$an]??0)+$pc;
+            }
+            $topSongs[]=array(
+                "id"=>$song["id"]??0,
+                "name"=>$name,
+                "artist"=>$artistStr,
+                "cover"=>$song["al"]["picUrl"]??"",
+                "playCount"=>$pc
+            );
+        }
+        usort($topSongs,function($a,$b){return $b["playCount"]-$a["playCount"];});
+        arsort($artistPlays);
+        $topArtists=array();
+        $i=0;
+        foreach($artistPlays as $an=>$pc){
+            $topArtists[]=array("name"=>$an,"playCount"=>$pc);
+            if(++$i>=10)break;
+        }
+        $body=json_encode(array(
+            "code"=>200,
+            "ok"=>true,
+            "type"=>$type,
+            "totalPlays"=>$totalPlays,
+            "songCount"=>$songs,
+            "artistCount"=>count($artistPlays),
+            "topSongs"=>array_slice($topSongs,0,10),
+            "topArtists"=>$topArtists
+        ),JSON_UNESCAPED_UNICODE);
+        @file_put_contents($cache,json_encode(array('t'=>time(),'body'=>$body)));
+        return $body;
     }
     public function scrobble($songid){
         $url="http://music.163.com/weapi/feedback/weblog";
@@ -353,7 +440,8 @@ elseif($_REQUEST["do"]=="email"){echo $api->loginByEmail($_REQUEST["uin"],$_REQU
 elseif($_REQUEST["do"]=="logout"){echo $api->logout();}
 elseif($_REQUEST["do"]=="status"){echo $api->status();}
 elseif($_REQUEST["do"]=="me"){echo $api->me();}
-elseif($_REQUEST["do"]=="sign"){echo $api->sign();}
+elseif($_REQUEST["do"]=="level"){echo $api->level();}
+elseif($_REQUEST["do"]=="report"){echo $api->report($_REQUEST["type"]??"0");}
 elseif($_REQUEST["do"]=="daka"){echo $api->daka_new();}
 elseif($_REQUEST["do"]=="check"){echo $api->follow();}
 elseif($_REQUEST["do"]=="detail"){echo $api->detail($_REQUEST["uid"]);}
